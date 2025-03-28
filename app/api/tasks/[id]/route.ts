@@ -5,8 +5,8 @@ import Task from "@/models/task";
 import { authOptions } from "@/lib/auth";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,9 +15,10 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectToDatabase();
     const task = await Task.findOne({
-      _id: params.id,
+      _id: id,
       userId: session.user.id,
     });
 
@@ -36,8 +37,8 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  context: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -46,7 +47,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = context.params; // Access params from context
+    const { id } = await params;
     const body = await request.json();
 
     await connectToDatabase();
@@ -72,8 +73,8 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -82,9 +83,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     await connectToDatabase();
     const task = await Task.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       userId: session.user.id,
     });
 
